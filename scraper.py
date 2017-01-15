@@ -1,4 +1,7 @@
+"""A simple scraper for food safety inspection data."""
+
 import requests
+from bs4 import BeautifulSoup
 
 DOMAIN = "http://info.kingcounty.gov/"
 PATH = 'health/ehs/foodsafety/inspections/Results.aspx'
@@ -40,3 +43,10 @@ def load_inspection_page():
         content = f.read()
         encoding = "utf-8"
     return content, encoding
+
+
+# then add this function lower down
+def parse_source(html, encoding='utf-8'):
+    parsed = BeautifulSoup(html, 'html5lib', from_encoding=encoding)
+    # Note you will have to pip install html5lib
+    return parsed
