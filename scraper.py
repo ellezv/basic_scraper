@@ -8,7 +8,7 @@ QUERY_PARAMS = {
     'Business_Address': '',
     'Longitude': '',
     'Latitude': '',
-    'City': 'seattle',
+    'City': 'Seattle',
     'Zip_Code': '',
     'Inspection_Type': 'All',
     'Inspection_Start': '',
@@ -23,19 +23,20 @@ QUERY_PARAMS = {
 
 
 def get_inspection_page(**kwargs):
+    """Return inspection information for given search."""
     url = DOMAIN + PATH
     params = QUERY_PARAMS.copy()
     for key, val in kwargs.items():
         if key in QUERY_PARAMS:
             params[key] = val
-    resp = requests.get(url, params=params)
+    resp = requests.get(url, params=params, stream=True)
     resp.raise_for_status()
-    return resp.content
+    return resp.content, resp.encoding
 
 
 def load_inspection_page():
     """Load inspection_page."""
     with open('inspection_page.html', 'r') as f:
         content = f.read()
-    return content
-
+        encoding = "utf-8"
+    return content, encoding
