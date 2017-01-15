@@ -3,6 +3,7 @@
 import requests
 from bs4 import BeautifulSoup
 import sys
+import re
 
 DOMAIN = "http://info.kingcounty.gov/"
 PATH = 'health/ehs/foodsafety/inspections/Results.aspx'
@@ -38,9 +39,9 @@ def get_inspection_page(**kwargs):
     return resp.content, resp.encoding
 
 
-def load_inspection_page():
+def load_inspection_page(file_path):
     """Load inspection_page."""
-    with open('inspection_page.html', 'r') as f:
+    with open(file_path, 'r') as f:
         content = f.read()
         encoding = "utf-8"
     return content, encoding
@@ -52,6 +53,12 @@ def parse_source(html, encoding='utf-8'):
     return parsed
 
 
+def extract_data_listings(parsed_data):
+    """Return a list of the restaurant listing container nodes."""
+    id_finder = re.compile(r'PR[\d]+~')
+    return html.find_all('div', id=id_finder)
+
+
 if __name__ == '__main__':
     kwargs = {
         'Inspection_Start': '2/1/2013',
@@ -60,8 +67,12 @@ if __name__ == '__main__':
     }
 
     if len(sys.argv) > 1 and sys.argv[1] == 'test':
-        html, encoding = load_inspection_page()
+        html, encoding = load_inspection_page('inspection_page.html')
     else:
         html, encoding = get_inspection_page(**kwargs)
     doc = parse_source(html, encoding)
-    print(doc.prettify(encoding=encoding))
+    print(type(doc))
+    listings = extract_data_listings(doc)
+    print(len(listings))
+    print(listings[0].prettify())
+    # print(doc.prettify(encoding=encoding))
