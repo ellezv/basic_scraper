@@ -5,56 +5,73 @@ from bs4 import BeautifulSoup
 import sys
 import re
 
-DOMAIN = "http://info.kingcounty.gov/"
-PATH = 'health/ehs/foodsafety/inspections/Results.aspx'
-QUERY_PARAMS = {
-    'Output': 'W',
-    'Business_Name': '',
-    'Business_Address': '',
-    'Longitude': '',
-    'Latitude': '',
-    'City': 'Seattle',
-    'Zip_Code': '',
-    'Inspection_Type': 'All',
-    'Inspection_Start': '',
-    'Inspection_End': '',
-    'Inspection_Closed_Business': 'A',
-    'Violation_Points': '',
-    'Violation_Red_Points': '',
-    'Violation_Descr': '',
-    'Fuzzy_Search': 'N',
-    'Sort': 'B',
+INSPECTION_DOMAIN = 'http://info.kingcounty.gov'
+INSPECTION_PATH = '/health/ehs/foodsafety/inspections/Results.aspx'
+INSPECTION_PARAMS = {
+    "Output": "W",
+    "Business_Name": "",
+    "Business_Address": "",
+    "Longitude": "",
+    "Latitude": "",
+    "City": "",
+    "Zip_Code": "",
+    "Inspection_Type": "All",
+    "Inspection_Start": "",
+    "Inspection_End": "",
+    "Inspection_Closed_Business": "A",
+    "Violation_Points": "",
+    "Violation_Red_Points": "",
+    "Violation_Descr": "",
+    "Fuzzy_Search": "N",
+    "Sort": "B",
 }
+
+query = {
+    "Business_Name": "Tango",
+    "Business_Address": "1100%20Pike%20St",
+    "City": "Seattle",
+    "Zip_Code": "98101"
+}
+
+UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36'
+
+HEADERS = {'User-Agent': UA}
 
 
 def get_inspection_page(**kwargs):
     """Return inspection information for given search."""
-    url = DOMAIN + PATH
-    params = QUERY_PARAMS.copy()
+    url = INSPECTION_DOMAIN + INSPECTION_PATH
+    params = INSPECTION_PARAMS.copy()
     for key, val in kwargs.items():
-        if key in QUERY_PARAMS:
+        if key in INSPECTION_PARAMS:
             params[key] = val
-    resp = requests.get(url, params=params, stream=True)
+    resp = requests.get(url, params=params, headers=HEADERS, stream=True)
     resp.raise_for_status()
     return resp.content, resp.encoding
 
 
-def load_inspection_page(file_path):
-    """Load inspection_page."""
-    with open(file_path, 'r') as f:
+def load_inspection_page():
+    """Load response from inspection_page."""
+    with open('inspection_page.html', 'r') as f:
         content = f.read()
-        encoding = "utf-8"
+        encoding = 'utf-8'
     return content, encoding
 
 
+def write_results(results):
+    """Write results of search to file."""
+    with open('inspection_page.html', 'w') as f:
+        f.write(results)
+
+
 def parse_source(html, encoding='utf-8'):
-    """Parse the html with beautifulsoup."""
-    parsed = BeautifulSoup(html, 'html5lib', from_encoding=encoding)
-    return parsed
+    """Set up HTML as DOM nodes for scraping."""
+    soup = BeautifulSoup(html, 'html5lib', from_encoding=encoding)
+    return soup
 
 
-def extract_data_listings(parsed_data):
-    """Return a list of the restaurant listing container nodes."""
+def extract_data_listings(html):
+    """Extract container with data."""
     id_finder = re.compile(r'PR[\d]+~')
     return html.find_all('div', id=id_finder)
 
@@ -67,7 +84,7 @@ if __name__ == '__main__':
     }
 
     if len(sys.argv) > 1 and sys.argv[1] == 'test':
-        html, encoding = load_inspection_page('inspection_page.html')
+        html, encoding = load_inspection_page()
     else:
         html, encoding = get_inspection_page(**kwargs)
     doc = parse_source(html, encoding)
