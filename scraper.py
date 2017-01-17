@@ -199,6 +199,7 @@ if __name__ == '__main__':
     for result in generate_results(test):
         geo_result = get_geojson(result)
         pprint.pprint(geo_result)
+        print()
         total_result['features'].append(geo_result)
     with open('my_map.json', 'w') as fh:
         json.dump(total_result, fh)
