@@ -85,12 +85,27 @@ def has_two_tds(elem):
 
 
 def clean_data(td):
-    """Cleans the cells to remove whitespace when printing."""
+    """Clean the cells to remove whitespace when printing."""
     data = td.string
     try:
         return data.strip(" \n:-")
     except AttributeError:
         return u""
+
+
+def extract_restaurant_metadata(elem):
+    """Extract the restaurant metadata, clean it and return it."""
+    metadata_rows = elem.find('tbody').find_all(
+        has_two_tds, recursive=False
+    )
+    rdata = {}
+    current_label = ''
+    for row in metadata_rows:
+        key_cell, val_cell = row.find_all('td', recursive=False)
+        new_label = clean_data(key_cell)
+        current_label = new_label if new_label else current_label
+        rdata.setdefault(current_label, []).append(clean_data(val_cell))
+    return rdata
 
 
 if __name__ == '__main__':
@@ -108,10 +123,6 @@ if __name__ == '__main__':
     print(type(doc))
     listings = extract_data_listings(doc)
     for listing in listings[:5]:
-        metadata_rows = listing.find('tbody').find_all(
-            has_two_tds, recursive=False
-        )
-        for row in metadata_rows:
-            for td in row.find_all('td', recursive=False):
-                print(repr(clean_data(td)))
-        print()
+        metadata = extract_restaurant_metadata(listing)
+        print(metadata)
+        print()  # prints extra line between each restaurant info.
