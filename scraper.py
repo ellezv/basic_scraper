@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import sys
 import re
 import geocoder
+import json
 
 INSPECTION_DOMAIN = 'http://info.kingcounty.gov'
 INSPECTION_PATH = '/health/ehs/foodsafety/inspections/Results.aspx'
@@ -194,7 +195,10 @@ def get_geojson(result):
 if __name__ == '__main__':
     import pprint
     test = len(sys.argv) > 1 and sys.argv[1] == 'test'
+    total_result = {'type': 'FeatureCollection', 'features': []}
     for result in generate_results(test):
         geo_result = get_geojson(result)
         pprint.pprint(geo_result)
-        print()
+        total_result['features'].append(geo_result)
+    with open('my_map.json', 'w') as fh:
+        json.dump(total_result, fh)
