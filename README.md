@@ -11,4 +11,4 @@ Using Requests and BeautifulSoup.
 
 
 ## Collaboration:
-Followed this [tutorial](https://codefellows.github.io/sea-python-401d5/assignments/tutorials/scraper.html) as well as class notes and received help from [@clair3st](github.com/clair3st/) when I got stuck! Thanks Claire!
+Followed this [tutorial](https://codefellows.github.io/sea-python-401d5/assignments/tutorials/scraper.html) as well as class notes and received help from [@clair3st](https://github.com/clair3st/) when I got stuck! Thanks Claire!
