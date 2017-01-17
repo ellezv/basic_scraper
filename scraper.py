@@ -108,6 +108,19 @@ def extract_restaurant_metadata(elem):
     return rdata
 
 
+def is_inspection_row(elem):
+    """Filter function to find rows."""
+    is_tr = elem.name == 'tr'
+    if not is_tr:
+        return False
+    td_children = elem.find_all('td', recursive=False)
+    has_four = len(td_children) == 4
+    this_text = clean_data(td_children[0]).lower()
+    contains_word = 'inspection' in this_text
+    does_not_start = not this_text.startswith('inspection')
+    return is_tr and has_four and contains_word and does_not_start
+
+
 if __name__ == '__main__':
     kwargs = {
         'Inspection_Start': '2/1/2013',
@@ -124,5 +137,6 @@ if __name__ == '__main__':
     listings = extract_data_listings(doc)
     for listing in listings[:5]:
         metadata = extract_restaurant_metadata(listing)
-        print(metadata)
-        print()  # prints extra line between each restaurant info.
+        inspection_rows = listing.find_all(is_inspection_row)
+        for row in inspection_rows:
+            print(row.text)
